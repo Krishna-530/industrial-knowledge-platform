@@ -1,0 +1,19 @@
+from fastapi import APIRouter
+from api.v1.endpoints import health, auth, protected, users, roles, categories, tags, documents, search, retrieval, context, prompt, llm, conversation
+
+api_router = APIRouter()
+
+api_router.include_router(health.router, prefix="/health", tags=["health"])
+api_router.include_router(auth.router, prefix="/auth", tags=["auth"])
+api_router.include_router(protected.router, prefix="/protected", tags=["protected"])
+api_router.include_router(users.router, prefix="/users", tags=["users"])
+api_router.include_router(roles.router, prefix="/roles", tags=["roles"])
+api_router.include_router(categories.router, prefix="/categories", tags=["categories"])
+api_router.include_router(tags.router, prefix="/tags", tags=["tags"])
+api_router.include_router(documents.router, prefix="/documents", tags=["documents"])
+api_router.include_router(search.router, prefix="/search", tags=["search"])
+api_router.include_router(retrieval.router, prefix="/retrieval", tags=["retrieval"])
+api_router.include_router(context.router, prefix="/context", tags=["context"])
+api_router.include_router(prompt.router, prefix="/prompt", tags=["prompt"])
+api_router.include_router(llm.router, prefix="/llm", tags=["llm"])
+api_router.include_router(conversation.router)

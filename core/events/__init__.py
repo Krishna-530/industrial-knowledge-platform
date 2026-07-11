@@ -1,0 +1,1 @@
+from core.events.document_uploaded import DocumentUploaded
