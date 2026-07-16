@@ -19,3 +19,23 @@ from core.exceptions.processing import (
 )
 from core.exceptions.storage import StorageException
 from core.exceptions.workflow import WorkflowException, EventDispatchException
+
+__all__ = [
+    "AppException",
+    "ValidationException",
+    "NotFoundError",
+    "InternalServerError",
+    "ConfigurationError",
+    "UnauthorizedError",
+    "ForbiddenError",
+    "EntityNotFoundError",
+    "DuplicateEntityError",
+    "DocumentContentException",
+    "DocumentContentPersistenceException",
+    "ProcessingFailedException",
+    "ProcessingValidationException",
+    "UnsupportedFormatError",
+    "StorageException",
+    "WorkflowException",
+    "EventDispatchException",
+]

@@ -2,9 +2,9 @@ from typing import AsyncGenerator, Any
 from app.conversation.conversation_service import ConversationService
 from app.workflows.executors.conversation_turn_executor import ConversationTurnExecutor
 from app.conversation.models.message import MessageCreate
-from core.exceptions.processing import ProcessingError
+from core.exceptions.processing import ProcessingFailedException
 
-class IdempotencyKeyError(ProcessingError):
+class IdempotencyKeyError(ProcessingFailedException):
     pass
 
 class ConversationWorkflow:

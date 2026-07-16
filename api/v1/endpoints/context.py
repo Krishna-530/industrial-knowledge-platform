@@ -1,14 +1,12 @@
 from fastapi import APIRouter, Depends, Security
 from pydantic import BaseModel
-from typing import Optional
-from uuid import UUID
 
 from app.search.schemas import SearchQuery
 from app.retrieval.schemas import RetrievalRequest
 from app.context.schemas import ContextPayload, ContextConfig
 from app.workflows.context_workflow import ContextWorkflow
 from api.v1.dependencies.context import provide_context_workflow
-from api.v1.dependencies.auth import get_current_user
+from dependencies.auth import get_current_user
 
 router = APIRouter(prefix="/context", tags=["Context Assembly"])
 

@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from api.v1.endpoints import health, auth, protected, users, roles, categories, tags, documents, search, retrieval, context, prompt, llm, conversation
+from api.v1.endpoints import health, auth, protected, users, roles, categories, tags, documents, search, retrieval, context, prompt, llm, conversation, analytics, dashboard, assets, conversations, graph
 
 api_router = APIRouter()
 
@@ -17,3 +17,8 @@ api_router.include_router(context.router, prefix="/context", tags=["context"])
 api_router.include_router(prompt.router, prefix="/prompt", tags=["prompt"])
 api_router.include_router(llm.router, prefix="/llm", tags=["llm"])
 api_router.include_router(conversation.router)
+api_router.include_router(analytics.router, prefix="/analytics", tags=["analytics"])
+api_router.include_router(dashboard.router)
+api_router.include_router(assets.router)
+api_router.include_router(conversations.router)
+api_router.include_router(graph.router)

@@ -8,6 +8,8 @@ from database.repositories.version import VersionRepository
 from database.repositories.user import UserRepository
 from database.repositories.category import CategoryRepository
 from database.repositories.tag import TagRepository
+from database.repositories.extracted_fact_repository import ExtractedFactRepository
+from app.services.knowledge_fact_service import KnowledgeFactService
 from api.v1.schemas.document import CreateDocumentRequest, UpdateDocumentRequest
 from core.exceptions import EntityNotFoundError, ValidationException, ForbiddenError
 from core.enums import DocumentStatus
@@ -17,13 +19,20 @@ from app.storage.service import StorageService
 logger = logging.getLogger(__name__)
 
 class DocumentService:
-    def __init__(self, session: AsyncSession, storage_service: Optional[StorageService] = None):
+    def __init__(
+        self, 
+        session: AsyncSession, 
+        storage_service: Optional[StorageService] = None,
+        knowledge_fact_service: Optional[KnowledgeFactService] = None
+    ):
         self.session = session
         self.document_repo = DocumentRepository(session)
         self.version_repo = VersionRepository(session)
         self.user_repo = UserRepository(session)
         self.category_repo = CategoryRepository(session)
         self.tag_repo = TagRepository(session)
+        self.fact_repo = ExtractedFactRepository(session)
+        self.knowledge_fact_service = knowledge_fact_service or KnowledgeFactService(session, self.fact_repo)
         self.storage_service = storage_service
         self.settings = Settings()
 
@@ -148,6 +157,12 @@ class DocumentService:
     async def create_document_version(self, document_id: UUID, version_number: int, user_id: UUID, storage_identifier: str, checksum: str):
         doc = await self.document_repo.get_by_id(document_id)
         doc.current_version = version_number
+        
+        # When a new version is created, existing facts become STALE
+        await self.knowledge_fact_service.mark_stale_for_document(document_id)
+        
+        # Reset extraction status to indicate reprocessing is needed
+        doc.extraction_status = None
         
         version = await self.version_repo.create(
             document_id=document_id,

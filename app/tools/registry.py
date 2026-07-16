@@ -1,4 +1,4 @@
-from typing import Dict, Optional, List, Tuple
+from typing import Dict, Optional, List
 from app.tools.models.tool_manifest import ToolManifest
 from app.tools.interfaces.tool_factory import ToolFactory
 

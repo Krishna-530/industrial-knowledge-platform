@@ -1,4 +1,4 @@
-from typing import AsyncGenerator, Any, List
+from typing import AsyncGenerator, Any
 from app.conversation.models.message import MessageCreate
 from app.conversation.models.conversation_turn import ConversationTurn
 from app.conversation.conversation_service import ConversationService
@@ -9,9 +9,14 @@ from app.workflows.llm_workflow import LLMWorkflow
 from app.workflows.tool_workflow import ToolWorkflow
 from app.conversation.models.conversation_config import ConversationConfig
 from app.tools.models.tool_context import ToolContext
-from app.llm.models.response import StreamChunk, ToolCallRequest
+from app.llm.models.response import StreamChunk
+from app.conversation.events.events import EventDispatcher, ConversationSummaryRequested
 import time
 import json
+from core.cancellation import CancellationToken
+from api.v1.schemas.streaming import (
+    AssistantDeltaEvent, ErrorEvent, ConversationCompletedEvent, TokenUsage
+)
 
 class ConversationTurnExecutor:
     def __init__(
@@ -22,7 +27,8 @@ class ConversationTurnExecutor:
         prompt_workflow: PromptWorkflow,
         llm_workflow: LLMWorkflow,
         tool_workflow: ToolWorkflow,
-        config: ConversationConfig
+        config: ConversationConfig,
+        event_dispatcher: EventDispatcher
     ):
         self.conversation_service = conversation_service
         self.retrieval_workflow = retrieval_workflow
@@ -31,8 +37,15 @@ class ConversationTurnExecutor:
         self.llm_workflow = llm_workflow
         self.tool_workflow = tool_workflow
         self.config = config
+        self.event_dispatcher = event_dispatcher
 
-    async def execute_turn_stream(self, conversation_id: str, user_message_id: str, expected_version: int) -> AsyncGenerator[Any, None]:
+    async def execute_turn_stream(
+        self, 
+        conversation_id: str, 
+        user_message_id: str, 
+        expected_version: int,
+        cancellation_token: CancellationToken = None
+    ) -> AsyncGenerator[Any, None]:
         iteration = 0
         
         turn = ConversationTurn(
@@ -64,12 +77,14 @@ class ConversationTurnExecutor:
                     if isinstance(chunk, StreamChunk):
                         if chunk.content_delta:
                             aggregated_content.append(chunk.content_delta)
+                            yield AssistantDeltaEvent(text=chunk.content_delta)
                         if chunk.finish_reason and chunk.finish_reason.value == "tool_call" and chunk.tool_call_delta:
                             tool_call_requests.append(chunk.tool_call_delta)
-                    yield chunk
-            except Exception as e:
+                    # For real implementations, propagate cancellation_token down to llm_workflow
+                    if cancellation_token and cancellation_token.is_cancelled:
+                        break
+            except Exception:
                 interrupted = True
-                
             final_content = "".join(aggregated_content)
             
             # Format tool calls in content if they exist for persistence
@@ -122,3 +137,27 @@ class ConversationTurnExecutor:
         turn.tool_calls_executed = iteration - 1
         
         await self.conversation_service.turn_repo.create(turn)
+        
+        # Check context size and emit threshold event if needed
+        # In a real system, calculate accurate token count. Here we simulate it.
+        estimated_tokens = len(history) * 50 # Dummy estimation
+        threshold = self.config.max_context_tokens * self.config.summary_threshold_percent
+        
+        if estimated_tokens > threshold:
+            event = ConversationSummaryRequested(
+                payload={
+                    "conversation_id": conversation_id,
+                    "expected_version": conversation.version,
+                    "target_message_id": turn.assistant_message_id
+                }
+            )
+            await self.event_dispatcher.dispatch(event)
+            
+        yield ConversationCompletedEvent(
+            conversation_id=conversation.id,
+            assistant_message_id=turn.assistant_message_id,
+            usage=TokenUsage(prompt_tokens=0, completion_tokens=0, total_tokens=0),
+            finish_reason="stop",
+            latency_ms=int(turn.latency_ms),
+            tool_count=turn.tool_calls_executed
+        )

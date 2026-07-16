@@ -5,7 +5,7 @@ from uuid import UUID
 from app.search.schemas import SearchQuery, SearchResultPage
 from app.workflows.search_workflow import SearchWorkflow
 from api.v1.dependencies.search import provide_search_workflow
-from api.v1.dependencies.auth import get_current_user
+from dependencies.auth import get_current_user
 
 router = APIRouter(prefix="/search", tags=["Search"])
 

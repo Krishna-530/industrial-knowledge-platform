@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.exc import IntegrityError
 from database.models.user import User
-from core.exceptions import EntityNotFoundError, DuplicateEntityError
+from core.exceptions import DuplicateEntityError
 
 class UserRepository:
     def __init__(self, session: AsyncSession):

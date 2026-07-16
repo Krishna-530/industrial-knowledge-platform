@@ -1,11 +1,10 @@
-from typing import List
 from uuid import UUID
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.v1.schemas.role import RoleResponse, RoleListResponse
 from database.engine import get_db_session
-from dependencies.auth import get_current_user, RoleChecker
+from dependencies.auth import RoleChecker
 from app.services.role_service import RoleService
 
 router = APIRouter()

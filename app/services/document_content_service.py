@@ -82,6 +82,6 @@ class DocumentContentService:
                     processing_started_at=datetime.now(timezone.utc)
                 )
                 await self.session.commit()
-        except SQLAlchemyError as e:
+        except SQLAlchemyError:
             await self.session.rollback()
             raise DocumentContentPersistenceException(message="Failed to mark processing as started")

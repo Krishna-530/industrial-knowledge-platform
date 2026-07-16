@@ -6,6 +6,8 @@ from core.security import verify_token
 from core.blacklist import is_blacklisted
 from core.exceptions import UnauthorizedError, ForbiddenError
 from api.v1.schemas.auth import User
+from app.security.context import SecurityContext
+from app.security.permissions import Permission
 
 settings = Settings()
 
@@ -64,11 +66,33 @@ async def get_current_user(
         full_name=user.name,
         role=role.name
     )
+
+async def get_security_context(
+    current_user: User = Depends(get_current_user),
+    db_session: AsyncSession = Depends(get_db_session)
+) -> SecurityContext:
+    # In a real system, you would fetch workspace and specific permissions from DB
+    # For now, we mock permissions based on role
+    permissions = []
+    if current_user.role.lower() == "admin":
+        permissions.append(Permission.ADMIN.value)
+    else:
+        permissions.extend([
+            Permission.READ_DOCUMENT.value,
+            Permission.READ_ASSET.value,
+            Permission.READ_ANALYTICS.value
+        ])
+        
+    return SecurityContext(
+        user=current_user,
+        permissions=permissions
+    )
 class RoleChecker:
     def __init__(self, allowed_roles: list[str]):
         self.allowed_roles = allowed_roles
 
     def __call__(self, current_user: User = Depends(get_current_user)):
-        if current_user.role not in self.allowed_roles:
+        allowed = [r.lower() for r in self.allowed_roles]
+        if current_user.role.lower() not in allowed:
             raise ForbiddenError(message="Operation not permitted")
         return current_user

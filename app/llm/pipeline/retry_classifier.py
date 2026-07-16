@@ -1,6 +1,5 @@
 from enum import Enum
 from app.llm.models.errors import (
-    ProviderError,
     RateLimited,
     TimeoutError,
     AuthenticationFailed,

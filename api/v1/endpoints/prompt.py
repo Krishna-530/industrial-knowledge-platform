@@ -6,7 +6,7 @@ from app.prompt.models.config import PromptConfig
 from app.prompt.models.schemas import PromptPayload
 from app.workflows.prompt_workflow import PromptWorkflow
 from api.v1.dependencies.prompt import provide_prompt_workflow
-from api.v1.dependencies.auth import get_current_user
+from dependencies.auth import get_current_user
 
 router = APIRouter(prefix="/prompt", tags=["Prompt Assembly"])
 

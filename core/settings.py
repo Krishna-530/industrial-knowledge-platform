@@ -22,6 +22,15 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 15
     refresh_token_expire_minutes: int = 60 * 24 * 7
 
+    # LLM Providers & Config
+    llm_provider: str = "groq"
+    max_context_tokens: int = 4096
+    summary_threshold_percent: float = 0.8
+    openai_api_key: str | None = None
+    groq_api_key: str | None = None
+    gemini_api_key: str | None = None
+    anthropic_api_key: str | None = None
+
     # Database
     database_url: str
     db_pool_size: int = 5
@@ -48,5 +57,20 @@ class Settings(BaseSettings):
     worker_backoff_multiplier: int = 10
     worker_orphan_timeout_minutes: int = 60
     worker_job_timeout_seconds: int = 300
+
+    # Embedding Pipeline Configuration
+    enable_embeddings: bool = True
+    embedding_timeout_seconds: int = 60
+    embedding_max_batch_size: int = 100
+    embedding_max_concurrency: int = 5
+    embedding_retry_limit: int = 5
+    embedding_backoff_factor: float = 2.0
+    embedding_max_cost_per_job: float = 1.0
+
+    # Knowledge Graph Config
+    enable_knowledge_graph: bool = False
+    neo4j_uri: str = "bolt://localhost:7687"
+    neo4j_user: str = "neo4j"
+    neo4j_password: str = "neo4j_password"
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")

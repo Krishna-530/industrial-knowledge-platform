@@ -21,11 +21,9 @@ class DocumentProcessor(ABC):
     @abstractmethod
     def supports(self, mime_type: str) -> bool:
         """Returns True if the processor supports the given MIME type."""
-        pass
 
     @abstractmethod
     async def process(self, file_stream: AsyncGenerator[bytes, None]) -> ProcessingResult:
         """
         Consumes an async byte stream and returns extracted content and metadata.
         """
-        pass

@@ -3,7 +3,7 @@ from app.tools.registry import ToolRegistry, ToolRegistration
 from app.tools.security.permission_evaluator import ToolPermissionEvaluator
 from app.tools.models.tool_manifest import ToolManifest
 from app.tools.models.tool_context import ToolContext
-from core.exceptions.auth import AuthorizationError
+from core.exceptions.auth import ForbiddenError
 
 class ToolService:
     def __init__(self, registry: ToolRegistry, permission_evaluator: ToolPermissionEvaluator):
@@ -16,8 +16,8 @@ class ToolService:
     async def validate_access(self, manifest: ToolManifest, context: ToolContext) -> None:
         """
         Validates whether the execution context has permission to run the tool.
-        Raises AuthorizationError if denied.
+        Raises ForbiddenError if denied.
         """
         has_access = await self.permission_evaluator.evaluate(manifest, context)
         if not has_access:
-            raise AuthorizationError(f"Access denied to tool: {manifest.id}")
+            raise ForbiddenError(f"Access denied to tool: {manifest.id}")

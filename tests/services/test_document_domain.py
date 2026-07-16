@@ -1,5 +1,4 @@
 import pytest
-from uuid import uuid4
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.services.category_service import CategoryService
 from app.services.tag_service import TagService

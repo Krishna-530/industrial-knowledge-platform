@@ -29,11 +29,24 @@ async def lifespan(app: FastAPI):
     publisher.subscribe(DocumentUploaded, handle_document_uploaded)
     publisher.subscribe(DocumentProcessed, handle_document_processed)
     
+    # Telemetry subscriptions
+    from app.events.telemetry_subscriber import telemetry_subscriber
+    from core.events.telemetry import (
+        SearchCompletedEvent, DocumentUploadedEvent, JobCompletedEvent,
+        UserLoggedInEvent, DocumentViewedEvent, DashboardViewedEvent
+    )
+    publisher.subscribe(SearchCompletedEvent, telemetry_subscriber.handle_search_completed)
+    publisher.subscribe(DocumentUploadedEvent, telemetry_subscriber.handle_telemetry_event)
+    publisher.subscribe(JobCompletedEvent, telemetry_subscriber.handle_telemetry_event)
+    publisher.subscribe(UserLoggedInEvent, telemetry_subscriber.handle_telemetry_event)
+    publisher.subscribe(DocumentViewedEvent, telemetry_subscriber.handle_telemetry_event)
+    publisher.subscribe(DashboardViewedEvent, telemetry_subscriber.handle_telemetry_event)
+    
     logger.info("Recovering orphaned jobs...")
-    from database.engine import async_session_maker
+    from database.engine import async_session_factory
     from app.services.job_service import JobService
     
-    async with async_session_maker() as session:
+    async with async_session_factory() as session:
         job_service = JobService(session)
         await job_service.recover_orphaned_jobs(timeout_minutes=settings.worker_orphan_timeout_minutes)
         
@@ -43,6 +56,13 @@ async def lifespan(app: FastAPI):
     worker_manager = provide_worker_manager()
     await worker_manager.start_all()
     
+    # Initialize Neo4j Driver if enabled
+    if settings.enable_knowledge_graph:
+        logger.info("Initializing Neo4j Graph Database...")
+        from database.neo4j_driver import Neo4jDriverManager
+        driver_manager = Neo4jDriverManager.get_instance(settings)
+        await driver_manager.connect()
+    
     yield
     
     logger.info("Stopping WorkerManager...")
@@ -51,4 +71,10 @@ async def lifespan(app: FastAPI):
     logger.info("Shutting down database engine...")
     from database.engine import engine
     await engine.dispose()
+    
+    if settings.enable_knowledge_graph:
+        from database.neo4j_driver import Neo4jDriverManager
+        driver_manager = Neo4jDriverManager.get_instance(settings)
+        await driver_manager.close()
+        
     logger.info("Shutting down...")

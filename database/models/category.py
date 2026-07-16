@@ -1,9 +1,12 @@
 import uuid
-from typing import List, Optional
+from typing import List, Optional, TYPE_CHECKING
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import UUID
 from database.models.base import Base, TimestampMixin
+
+if TYPE_CHECKING:
+    from database.models.document import Document
 
 class Category(TimestampMixin, Base):
     __tablename__ = "categories"

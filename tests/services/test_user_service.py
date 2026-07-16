@@ -1,9 +1,8 @@
 import pytest
-from uuid import uuid4
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.services.user_service import UserService
-from api.v1.schemas.user import CreateUserRequest, UpdateUserRequest, UpdatePasswordRequest, UpdateRoleRequest
-from core.exceptions import EntityNotFoundError, ForbiddenError
+from api.v1.schemas.user import CreateUserRequest, UpdateUserRequest
+from core.exceptions import ForbiddenError
 
 @pytest.mark.asyncio
 async def test_create_user(db_session: AsyncSession):

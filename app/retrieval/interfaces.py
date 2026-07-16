@@ -13,7 +13,6 @@ class AbstractRetrievalStrategy(ABC):
         """
         Returns (hits, total_count, has_more)
         """
-        pass
 
 class AbstractRanker(ABC):
     """

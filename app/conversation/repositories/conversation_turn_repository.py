@@ -1,4 +1,4 @@
-from typing import List, Dict, Optional
+from typing import List, Dict
 from app.conversation.models.conversation_turn import ConversationTurn
 
 class ConversationTurnRepository:

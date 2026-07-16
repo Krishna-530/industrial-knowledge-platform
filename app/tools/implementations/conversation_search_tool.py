@@ -3,7 +3,7 @@ from app.tools.interfaces.abstract_tool import AbstractTool
 from app.tools.models.tool_context import ToolContext
 from app.search.strategies.conversation_search_strategy import ConversationSearchStrategy
 from app.conversation.conversation_service import ConversationService
-from core.exceptions.auth import AuthorizationError
+from core.exceptions.auth import ForbiddenError
 
 class ConversationSearchTool(AbstractTool):
     def __init__(self, search_strategy: ConversationSearchStrategy, conversation_service: ConversationService):
@@ -20,7 +20,7 @@ class ConversationSearchTool(AbstractTool):
         # Verify access to the conversation context
         conv = await self.conversation_service.get_conversation(context.conversation_id)
         if conv and conv.workspace_id != context.workspace_id:
-             raise AuthorizationError("Access denied to search conversation")
+             raise ForbiddenError("Access denied to search conversation")
             
         # Delegate to search strategy abstraction
         messages = await self.search_strategy.search(

@@ -1,6 +1,6 @@
 from typing import Callable
 from sqlalchemy.ext.asyncio import AsyncSession
-from database.engine import async_session_maker
+from database.engine import async_session_factory
 from workers.job_executor import JobExecutor
 from database.models.job import Job
 import logging
@@ -16,7 +16,7 @@ class ExecutionBoundary:
         self.executor_factory = executor_factory
         
     async def execute_job(self, job: Job):
-        async with async_session_maker() as session:
+        async with async_session_factory() as session:
             try:
                 executor = self.executor_factory(session)
                 await executor.execute(job)

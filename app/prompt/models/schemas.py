@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List, Optional, Any, Union
+from typing import List, Optional, Union
 from pydantic import BaseModel, Field
 from app.prompt.models.metadata import PromptMetadata
 from app.prompt.models.tools import ToolDefinition

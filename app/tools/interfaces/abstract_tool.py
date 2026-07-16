@@ -10,4 +10,3 @@ class AbstractTool(ABC):
         Returns an object that can be serialized.
         The ToolWorkflow will catch exceptions and handle truncation.
         """
-        pass

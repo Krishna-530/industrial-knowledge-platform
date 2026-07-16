@@ -1,11 +1,11 @@
-from typing import List, Optional, Any
+from typing import List, Any
 from uuid import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 import logging
 
 from database.repositories.user import UserRepository
 from database.repositories.role import RoleRepository
-from core.exceptions import EntityNotFoundError, DuplicateEntityError, ForbiddenError
+from core.exceptions import EntityNotFoundError, ForbiddenError
 from core.security import get_password_hash
 from api.v1.schemas.user import CreateUserRequest, UpdateUserRequest, UpdatePasswordRequest, UpdateRoleRequest
 
@@ -82,13 +82,13 @@ class UserService:
         if user_id == current_user_id:
             raise ForbiddenError(message="Cannot delete yourself")
             
-        user = await self.get_user(user_id)
+        await self.get_user(user_id)
         await self.user_repo.delete(user_id)
         await self.session.commit()
         return True
 
     async def update_password(self, user_id: UUID, data: UpdatePasswordRequest):
-        user = await self.get_user(user_id)
+        await self.get_user(user_id)
         hashed_pwd = get_password_hash(data.password)
         await self.user_repo.update(user_id, password_hash=hashed_pwd)
         await self.session.commit()
@@ -96,7 +96,7 @@ class UserService:
 
     async def assign_role(self, user_id: UUID, data: UpdateRoleRequest):
         await self._check_role_exists(data.role_id)
-        user = await self.get_user(user_id)
+        await self.get_user(user_id)
         await self.user_repo.update(user_id, role_id=data.role_id)
         await self.session.commit()
         return await self.get_user(user_id)

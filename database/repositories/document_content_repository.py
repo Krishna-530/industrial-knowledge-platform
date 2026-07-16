@@ -1,5 +1,5 @@
 from uuid import UUID
-from typing import Optional, Dict
+from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from database.models.document_content import DocumentContent

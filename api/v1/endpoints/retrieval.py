@@ -1,13 +1,12 @@
 from fastapi import APIRouter, Depends, Security
 from typing import Optional
-from uuid import UUID
 from pydantic import BaseModel, Field
 
 from app.search.schemas import SearchQuery
 from app.retrieval.schemas import RetrievalRequest, RetrievalResult
 from app.workflows.retrieval_workflow import RetrievalWorkflow
 from api.v1.dependencies.retrieval import provide_retrieval_workflow
-from api.v1.dependencies.auth import get_current_user
+from dependencies.auth import get_current_user
 
 router = APIRouter(prefix="/retrieval", tags=["Retrieval"])
 
@@ -46,3 +45,52 @@ async def retrieve_knowledge(
          roles = []
 
     return await workflow.execute_retrieval(request, roles)
+
+from fastapi.responses import StreamingResponse
+import asyncio
+import json
+from uuid import uuid4
+from app.retrieval.session import RetrievalSession
+from app.retrieval.orchestrator import GraphRetrievalOrchestrator
+
+@router.post("/stream")
+async def stream_knowledge(
+    payload: APIRetrievalRequest,
+    current_user = Security(get_current_user),
+):
+    session = RetrievalSession(
+        request_id=str(uuid4()),
+        tenant_id=getattr(current_user, 'tenant_id', 'default'),
+        original_query=payload.search_query.text,
+        requesting_user_id=current_user.id
+    )
+    
+    # Stubbed orchestrator dependencies for Stage 3
+    orchestrator = GraphRetrievalOrchestrator(None, None, None, None, None)
+    
+    async def sse_generator():
+        yield f"retry: 3000\nid: {session.request_id}\nevent: start\ndata: {json.dumps({'query': payload.search_query.text})}\n\n"
+        
+        try:
+            gen = orchestrator.stream_execute(session)
+            while True:
+                try:
+                    # Wait for next chunk or timeout for heartbeat
+                    chunk = await asyncio.wait_for(gen.__anext__(), timeout=15.0)
+                    yield f"id: {str(uuid4())}\nevent: message\ndata: {json.dumps(chunk)}\n\n"
+                except asyncio.TimeoutError:
+                    # Send heartbeat
+                    yield f"event: heartbeat\ndata: {{}}\n\n"
+                except StopAsyncIteration:
+                    break
+                    
+        except asyncio.CancelledError:
+            # Client disconnected
+            yield f"event: disconnect\ndata: {json.dumps({'status': 'cancelled'})}\n\n"
+            raise
+        except Exception as e:
+            yield f"event: error\ndata: {json.dumps({'detail': str(e)})}\n\n"
+            
+        yield f"event: complete\ndata: {json.dumps({'status': 'success'})}\n\n"
+
+    return StreamingResponse(sse_generator(), media_type="text/event-stream")

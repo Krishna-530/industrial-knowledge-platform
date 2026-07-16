@@ -56,3 +56,4 @@ class ContextPayload(BaseModel):
     assembly_duration_ms: float
     generated_at: datetime
     report: AssemblyReport
+    conversation_summary: Optional[str] = None

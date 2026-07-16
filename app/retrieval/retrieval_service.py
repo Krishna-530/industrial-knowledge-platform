@@ -1,7 +1,6 @@
 import time
-from typing import List, Optional
+from typing import List
 from datetime import datetime
-from uuid import UUID
 
 from app.retrieval.schemas import RetrievalRequest, RetrievalResult, RetrievalTelemetry
 from app.retrieval.interfaces import AbstractRetrievalStrategy, AbstractRanker

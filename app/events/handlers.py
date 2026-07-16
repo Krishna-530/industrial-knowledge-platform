@@ -1,13 +1,13 @@
 import logging
 from core.events.document_uploaded import DocumentUploaded
-from database.engine import async_session_maker
+from database.engine import async_session_factory
 from app.services.job_service import JobService
 from workers.payloads import ProcessingJobPayload
 
 logger = logging.getLogger(__name__)
 
 async def handle_document_uploaded(event: DocumentUploaded) -> None:
-    async with async_session_maker() as session:
+    async with async_session_factory() as session:
         job_service = JobService(session)
         payload = ProcessingJobPayload(
             document_id=event.document_id,
@@ -28,7 +28,7 @@ from core.events.document_processed import DocumentProcessed
 from workers.payloads import IndexingJobPayload
 
 async def handle_document_processed(event: DocumentProcessed) -> None:
-    async with async_session_maker() as session:
+    async with async_session_factory() as session:
         job_service = JobService(session)
         payload = IndexingJobPayload(
             document_id=event.document_id,

@@ -1,13 +1,9 @@
 import logging
 from uuid import UUID
-from typing import Optional, List
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, update, func, text, and_
+from sqlalchemy import text
 from app.search.interfaces import AbstractSearchProvider
 from app.search.schemas import SearchQuery, SearchResult, SearchResultPage
-from database.models.document import Document
-from database.models.document_version import DocumentVersion
-from database.models.document_content import DocumentContent
 
 logger = logging.getLogger(__name__)
 

@@ -1,9 +1,8 @@
-from typing import Optional, List, Any, Dict
+from typing import Optional, Any, Dict
 from pydantic import BaseModel, Field
 from datetime import datetime
 import uuid
 from app.conversation.models.conversation_state import ConversationState
-from app.conversation.models.message import Message
 
 class ConversationBase(BaseModel):
     title: str = "New Conversation"
@@ -20,3 +19,8 @@ class Conversation(ConversationBase):
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
     metadata: Dict[str, Any] = Field(default_factory=dict)
+    
+    # Phase 8.3 Memory & Context
+    summary: Optional[str] = None
+    summarized_up_to_message_id: Optional[str] = None
+    summary_version: int = 0

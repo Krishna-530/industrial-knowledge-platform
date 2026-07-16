@@ -2,7 +2,7 @@ from uuid import UUID
 from typing import Optional, List
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy import update, and_
+from sqlalchemy import and_, func
 from database.models.job import Job
 from core.enums.job_status import JobStatus
 from datetime import datetime, timezone
@@ -20,6 +20,18 @@ class JobRepository:
     async def get_by_id(self, job_id: UUID) -> Optional[Job]:
         result = await self.session.execute(select(Job).where(Job.id == job_id))
         return result.scalars().first()
+
+    async def get_queue_metrics(self) -> dict:
+        stmt = select(Job.status, func.count(Job.id)).group_by(Job.status)
+        result = await self.session.execute(stmt)
+        metrics = {status.value: count for status, count in result.all()}
+        metrics["TOTAL"] = sum(metrics.values())
+        return metrics
+
+    async def get_recent_jobs(self, limit: int = 10) -> List[Job]:
+        stmt = select(Job).order_by(Job.created_at.desc()).limit(limit)
+        result = await self.session.execute(stmt)
+        return list(result.scalars().all())
 
     async def dequeue(self, supported_types: List[str]) -> Optional[Job]:
         # Lock one QUEUED job where next_retry_at is <= now or null

@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Dict
 from uuid import UUID
 from app.prompt.interfaces import AbstractTemplateRegistry
 from app.prompt.models.template import PromptTemplate, PromptVersion

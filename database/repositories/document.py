@@ -22,6 +22,10 @@ class DocumentRepository:
         )
         return result.scalars().first()
 
+    async def count_all(self) -> int:
+        result = await self.session.execute(select(func.count(Document.id)))
+        return result.scalar() or 0
+
     async def create(self, *, title: str, owner_id: UUID, category_id: UUID, description: Optional[str] = None, tags: List[Any] = None) -> Document:
         doc = Document(
             title=title,

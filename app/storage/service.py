@@ -59,7 +59,7 @@ class StorageService:
         logger.info({"event": "storage_read_start", "storage_identifier": storage_identifier})
         # Wrap generator to log errors, etc. if needed, or just return it
         # Note: read_file in base returns AsyncGenerator
-        return await self.provider.read_file(document_id, storage_identifier)
+        return self.provider.read_file(document_id, storage_identifier)
 
     async def delete_file(self, document_id: UUID, storage_identifier: str) -> bool:
         logger.info({"event": "storage_delete", "storage_identifier": storage_identifier})

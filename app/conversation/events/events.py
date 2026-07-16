@@ -11,6 +11,9 @@ class MessageCreatedEvent(DomainEvent):
 class ConversationCompletedEvent(DomainEvent):
     event_type: str = "ConversationCompleted"
 
+class ConversationSummaryRequested(DomainEvent):
+    event_type: str = "ConversationSummaryRequested"
+
 class EventDispatcher:
     def __init__(self):
         self._handlers = []

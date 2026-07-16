@@ -1,11 +1,10 @@
 from typing import Optional, List
 from app.conversation.models.conversation import Conversation, ConversationCreate
 from app.conversation.models.message import Message, MessageCreate
-from app.conversation.models.conversation_state import ConversationState
 from app.conversation.repositories.conversation_repository import ConversationRepository
 from app.conversation.repositories.message_repository import MessageRepository
 from app.conversation.repositories.conversation_turn_repository import ConversationTurnRepository
-from app.conversation.events.events import EventDispatcher, MessageCreatedEvent, ConversationCompletedEvent
+from app.conversation.events.events import EventDispatcher, MessageCreatedEvent
 
 class ConversationService:
     def __init__(
@@ -49,3 +48,8 @@ class ConversationService:
         await self.event_dispatcher.dispatch(MessageCreatedEvent(payload={"message_id": message.id}))
         
         return message
+
+    async def update_summary(self, conversation: Conversation, expected_version: int) -> Conversation:
+        # Optimistic locking update, but we also increment the summary version
+        conversation.summary_version += 1
+        return await self.conversation_repo.update_versioned(conversation, expected_version)

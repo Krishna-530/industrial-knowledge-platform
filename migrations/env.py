@@ -31,6 +31,16 @@ from database.models.document import Document
 from database.models.document_version import DocumentVersion
 from database.models.document_content import DocumentContent
 from database.models.job import Job
+from database.models.search_log import SearchLog
+from database.models.telemetry_event import TelemetryEvent
+from database.models.document_chunk import DocumentChunk
+from database.models.entity import Entity, EntityAlias, EntityVersion
+from database.models.graph_outbox import GraphOutboxEvent
+from database.models.prompt import PromptVersion
+from database.models.cost import ExtractionCostLog
+from database.models.relationship import Relationship, RelationshipEvidence
+from database.models.extracted_fact import ExtractedFact
+from database.models.intelligence_finding import IntelligenceFinding
 
 target_metadata = Base.metadata
 

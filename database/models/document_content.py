@@ -1,11 +1,14 @@
 import uuid
 from datetime import datetime, timezone
-from typing import Optional, Dict
+from typing import Optional, Dict, TYPE_CHECKING
 from sqlalchemy import Integer, ForeignKey, DateTime, Text, Enum as SQLAlchemyEnum, String, Index
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import UUID, JSONB, TSVECTOR
 from database.models.base import Base
 from core.enums.processing_status import ProcessingStatus
+
+if TYPE_CHECKING:
+    from database.models.document_version import DocumentVersion
 
 class DocumentContent(Base):
     __tablename__ = "document_contents"

@@ -1,4 +1,3 @@
-import pytest
 import groq
 import httpx
 from app.llm.providers.adapters.groq_adapter import GroqAdapter

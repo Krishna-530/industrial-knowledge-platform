@@ -1,5 +1,3 @@
-import json
-from typing import Any
 from groq.types.chat import ChatCompletion, ChatCompletionChunk
 from app.llm.interfaces.normalizer import AbstractResponseNormalizer, AbstractStreamNormalizer
 from app.llm.models.response import ExecutionResult, StreamChunk, UsageMetrics, ProviderMetadata, FinishReason, ToolCallRequest
@@ -67,7 +65,7 @@ class GroqStreamNormalizer(AbstractStreamNormalizer):
             )
             
         # For raw groq chunk mapping (before assembler finishes)
-        tc_delta = None
+
         if choice.delta.tool_calls:
             tc = choice.delta.tool_calls[0]
             if tc.function:

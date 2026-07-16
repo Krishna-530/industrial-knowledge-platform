@@ -18,7 +18,6 @@ class AbstractPromptRenderer(ABC):
         For advanced templates, this might return JSON structure that represents multiple messages.
         For simple ones, it returns a string.
         """
-        pass
 
 class AbstractMessageOrderingStrategy(ABC):
     @abstractmethod

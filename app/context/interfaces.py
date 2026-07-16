@@ -29,4 +29,3 @@ class AbstractPackingStrategy(ABC):
         """
         Returns a tuple of (packed_chunks, total_estimated_tokens)
         """
-        pass

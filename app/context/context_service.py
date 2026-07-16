@@ -5,7 +5,7 @@ from typing import List, Dict
 
 from app.retrieval.schemas import KnowledgeDocument
 from app.context.schemas import ContextConfig, ContextPayload, AssemblyReport, ContextFormat
-from app.context.interfaces import AbstractContextFormatter, AbstractTokenCounter
+from app.context.interfaces import AbstractContextFormatter
 from app.context.pipeline.chunk_extractor import ChunkExtractor
 from app.context.pipeline.chunk_selector import ChunkSelector
 from app.context.pipeline.context_compressor import ContextCompressor

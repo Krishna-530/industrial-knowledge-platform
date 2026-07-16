@@ -1,5 +1,8 @@
 import uuid
-from typing import List
+from typing import List, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from database.models.document import Document
 from sqlalchemy import String, Table, Column, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import UUID

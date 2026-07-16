@@ -5,16 +5,21 @@ from testcontainers.postgres import PostgresContainer
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from alembic.config import Config
 from alembic import command
-from database.models.base import Base
 
 @pytest.fixture(scope="session")
 def postgres_container():
-    """Starts a Postgres container for the entire test session."""
-    with PostgresContainer("postgres:15-alpine") as postgres:
-        # Generate the async URL (testcontainers gives sync psycopg2 by default)
-        conn_url = postgres.get_connection_url()
-        async_url = conn_url.replace("postgresql+psycopg2", "postgresql+asyncpg")
-        # Ensure our tests use this URL by overriding the environment
+    """Starts a Postgres container or uses local if docker is unavailable."""
+    import os
+    try:
+        from testcontainers.postgres import PostgresContainer
+        with PostgresContainer("postgres:15-alpine") as postgres:
+            conn_url = postgres.get_connection_url()
+            async_url = conn_url.replace("postgresql+psycopg2", "postgresql+asyncpg")
+            os.environ["DATABASE_URL"] = async_url
+            yield async_url
+    except Exception as e:
+        # Fallback to local DB from .env if testcontainers fails
+        async_url = os.getenv("DATABASE_URL", "postgresql+asyncpg://postgres:Krishna509@localhost:5432/industrial_knowledge_platform")
         os.environ["DATABASE_URL"] = async_url
         yield async_url
 

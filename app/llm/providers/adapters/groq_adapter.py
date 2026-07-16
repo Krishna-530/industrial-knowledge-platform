@@ -1,4 +1,4 @@
-from typing import Any, AsyncGenerator, Dict, List
+from typing import Any, AsyncGenerator, Dict
 import groq
 from app.llm.interfaces.adapter import AbstractSDKAdapter
 from app.llm.models.request import LLMRequest

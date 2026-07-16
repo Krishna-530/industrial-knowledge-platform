@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, List
 from pydantic import BaseModel, Field
 
 class ToolCategory(str, Enum):

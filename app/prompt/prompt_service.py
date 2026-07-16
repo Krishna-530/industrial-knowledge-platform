@@ -3,7 +3,7 @@ import logging
 from typing import Dict, Any
 
 from app.prompt.models.config import PromptConfig
-from app.prompt.models.schemas import PromptPayload, PromptMessage, PromptRole, TextBlock, ContentType
+from app.prompt.models.schemas import PromptPayload, PromptMessage, PromptRole, TextBlock
 from app.prompt.components.template_resolver import TemplateResolver
 from app.prompt.components.jinja_renderer import JinjaPromptRenderer
 from app.prompt.components.prompt_builder import PromptBuilder

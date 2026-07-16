@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import AsyncGenerator
 from app.llm.models.context import ExecutionContext, ExecutionState
 
 class AbstractPipelineStage(ABC):

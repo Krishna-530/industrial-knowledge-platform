@@ -1,10 +1,9 @@
-from typing import List, Optional
+from typing import Optional
 from uuid import UUID
-from fastapi import APIRouter, Depends, Query, status, UploadFile, File, Request, HTTPException
+import logging
+from fastapi import APIRouter, Depends, Query, status, UploadFile, File
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
-from core.settings import Settings
-from app.storage.local import LocalStorageProvider
 from app.storage.service import StorageService
 
 from api.v1.schemas.document import CreateDocumentRequest, UpdateDocumentRequest, DocumentResponse, DocumentListResponse
@@ -13,7 +12,7 @@ from database.engine import get_db_session
 from dependencies.auth import get_current_user, RoleChecker
 from app.services.document_service import DocumentService
 from app.workflows.document_upload_workflow import DocumentUploadWorkflow
-from api.v1.dependencies.providers import provide_document_upload_workflow
+from api.v1.dependencies.providers import provide_document_upload_workflow, provide_storage_service
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -93,7 +92,7 @@ async def upload_document_version(
         content_length=file.size
     )
     
-    # Return updated document
+    service = DocumentService(db)
     return await service.get_document(document_id)
 
 @router.get("/{document_id}/download", dependencies=[Depends(get_current_user)])
@@ -101,7 +100,7 @@ async def download_document(
     document_id: UUID,
     version: Optional[int] = Query(None),
     db: AsyncSession = Depends(get_db_session),
-    storage_service: StorageService = Depends(get_storage_service)
+    storage_service: StorageService = Depends(provide_storage_service)
 ):
     service = DocumentService(db, storage_service)
     stream, filename, file_size = await service.get_download_stream(document_id, version)
@@ -114,3 +113,32 @@ async def download_document(
             "Content-Length": str(file_size)
         }
     )
+
+from typing import List
+from api.v1.schemas.explorer import ExplorerChunkResponse, ExplorerEntityResponse, ExplorerRelationshipResponse
+from app.services.document_explorer_service import DocumentExplorerService
+from database.repositories.graph_readonly_repository import ReadOnlyGraphRepository
+
+def get_document_explorer_service() -> DocumentExplorerService:
+    return DocumentExplorerService(ReadOnlyGraphRepository(driver=None)) # Stubbed driver
+
+@router.get("/{document_id}/chunks", response_model=List[ExplorerChunkResponse], dependencies=[Depends(get_current_user)])
+async def get_document_chunks(
+    document_id: UUID,
+    service: DocumentExplorerService = Depends(get_document_explorer_service)
+):
+    return await service.get_document_chunks(str(document_id))
+
+@router.get("/{document_id}/entities", response_model=List[ExplorerEntityResponse], dependencies=[Depends(get_current_user)])
+async def get_document_entities(
+    document_id: UUID,
+    service: DocumentExplorerService = Depends(get_document_explorer_service)
+):
+    return await service.get_document_entities(str(document_id))
+
+@router.get("/{document_id}/relationships", response_model=List[ExplorerRelationshipResponse], dependencies=[Depends(get_current_user)])
+async def get_document_relationships(
+    document_id: UUID,
+    service: DocumentExplorerService = Depends(get_document_explorer_service)
+):
+    return await service.get_document_relationships(str(document_id))
