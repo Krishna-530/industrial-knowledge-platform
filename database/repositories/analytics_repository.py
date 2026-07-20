@@ -27,7 +27,7 @@ class AnalyticsRepository:
             select(func.count(Job.id)).where(Job.status == "FAILED")
         )
         # Mocking average processing time since there's no completion time column in this simple Job model
-        avg_processing_time = 0.0
+        avg_processing_time = None
 
         # Search Analytics
         search_count = await self.session.scalar(
@@ -43,7 +43,7 @@ class AnalyticsRepository:
 
         avg_search_time = await self.session.scalar(
             select(func.avg(SearchLog.execution_time_ms)).where(SearchLog.created_at.between(start_date, end_date))
-        ) or 0.0
+        )
 
         # User Analytics
         active_users = await self.session.scalar(
@@ -67,8 +67,8 @@ class AnalyticsRepository:
                 search_count=search_count,
                 top_queries=[],
                 zero_result_searches=zero_results,
-                average_response_time_ms=float(avg_search_time),
-                search_success_rate=1.0 if search_count > 0 else 0.0
+                average_response_time_ms=float(avg_search_time) if avg_search_time else None,
+                search_success_rate=1.0 if search_count > 0 else None
             ),
             users=UserAnalytics(active_users=active_users),
             storage=StorageAnalytics(total_storage_bytes=0)

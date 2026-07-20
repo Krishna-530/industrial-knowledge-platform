@@ -13,14 +13,14 @@ class DocumentAnalytics(BaseModel):
 class ProcessingAnalytics(BaseModel):
     queue_length: int
     failed_jobs: int
-    average_processing_time_ms: float
+    average_processing_time_ms: Optional[float] = None
 
 class SearchAnalytics(BaseModel):
     search_count: int
     top_queries: List[str]
     zero_result_searches: int
-    average_response_time_ms: float
-    search_success_rate: float
+    average_response_time_ms: Optional[float] = None
+    search_success_rate: Optional[float] = None
 
 class UserAnalytics(BaseModel):
     active_users: int

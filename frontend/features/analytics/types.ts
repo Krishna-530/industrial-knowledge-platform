@@ -11,15 +11,15 @@ export interface DocumentAnalytics {
 export interface ProcessingAnalytics {
   queue_length: number;
   failed_jobs: number;
-  average_processing_time_ms: number;
+  average_processing_time_ms: number | null;
 }
 
 export interface SearchAnalytics {
   search_count: number;
   top_queries: string[];
   zero_result_searches: number;
-  average_response_time_ms: number;
-  search_success_rate: number;
+  average_response_time_ms: number | null;
+  search_success_rate: number | null;
 }
 
 export interface UserAnalytics {

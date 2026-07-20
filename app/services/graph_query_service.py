@@ -74,7 +74,7 @@ class GraphQueryService:
 
     async def get_statistics(self) -> Dict[str, Any]:
         if not self.repo:
-            return {"total_nodes": 0, "total_edges": 0, "lag_seconds": 0.0, "active_tenants": 0}
+            return {"total_nodes": 0, "total_edges": 0, "lag_seconds": None, "active_tenants": None}
         query = """
         CALL { MATCH (n) RETURN count(n) AS total_nodes }
         CALL { MATCH ()-[r]->() RETURN count(r) AS total_edges }
@@ -82,13 +82,13 @@ class GraphQueryService:
         """
         records = await self.repo.execute_read(query, {})
         if not records:
-            return {"total_nodes": 0, "total_edges": 0, "lag_seconds": 0.0, "active_tenants": 0}
+            return {"total_nodes": 0, "total_edges": 0, "lag_seconds": None, "active_tenants": None}
             
         return {
             "total_nodes": records[0]["total_nodes"],
             "total_edges": records[0]["total_edges"],
-            "lag_seconds": 1.2, # Mock telemetry lag
-            "active_tenants": 1 # Mock tenant count
+            "lag_seconds": None,
+            "active_tenants": None
         }
 
     async def get_relationship_evidence(self, relationship_id: str) -> Dict[str, Any]:

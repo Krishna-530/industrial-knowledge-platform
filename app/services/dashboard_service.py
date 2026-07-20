@@ -61,12 +61,7 @@ class DashboardService:
         # Build Stats
         stats = DashboardStats(
             total_documents=doc_count,
-            total_assets=0,
-            active_conflicts=0,
-            processing_jobs=queue_metrics.get(JobStatus.PROCESSING.value, 0),
-            total_chunks=chunk_count,
-            total_entities=entity_count,
-            total_relationships=rel_count
+            total_assets=0
         )
         
         # Build Knowledge Graph
