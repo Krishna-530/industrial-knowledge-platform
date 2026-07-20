@@ -19,15 +19,15 @@ async def run():
             new_user = User(
                 name="Admin",
                 email="admin@example.com",
-                password_hash=get_password_hash('AdminPassword123!'),
+                password_hash=get_password_hash('admin'),
                 role_id=role.id
             )
             db.add(new_user)
             await db.commit()
-            print('Admin user created with AdminPassword123!')
+            print('Admin user created with admin!')
         else:
-            from api.v1.schemas.user import UpdatePasswordRequest
-            await svc.update_password(user.id, UpdatePasswordRequest(password='AdminPassword123!'))
+            user.password_hash = get_password_hash('admin')
+            await db.commit()
             print('Password updated')
             
 if __name__ == "__main__":

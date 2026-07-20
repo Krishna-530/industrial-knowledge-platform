@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     log_format: str = "json"  # json or standard
     
     # CORS
-    cors_origins: list[str] = ["*"]
+    cors_origins: list[str] = ["http://localhost:3000"]
     cors_allow_credentials: bool = True
     cors_allow_methods: list[str] = ["*"]
     cors_allow_headers: list[str] = ["*"]
