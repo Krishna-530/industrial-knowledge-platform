@@ -43,7 +43,7 @@ class JobExecutor:
             elif job.job_type == "INDEX_DOCUMENT":
                 payload = IndexingJobPayload(**job.payload)
                 await asyncio.wait_for(
-                    self.indexing_workflow.handle_document_indexed(payload.version_id),
+                    self.indexing_workflow.handle_document_indexed(payload.document_id, payload.version_id),
                     timeout=self.job_timeout_seconds
                 )
             else:

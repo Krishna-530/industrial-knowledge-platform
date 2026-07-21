@@ -32,7 +32,7 @@ class DocumentRepository:
             description=description,
             owner_id=owner_id,
             category_id=category_id,
-            current_version=1,
+            current_version=0,  # Upload workflow will set this to 1 on first upload
             status=DocumentStatus.DRAFT,
             tags=tags or []
         )

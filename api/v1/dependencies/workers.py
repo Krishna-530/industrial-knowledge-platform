@@ -33,6 +33,8 @@ def provide_job_executor_factory() -> Callable[[AsyncSession], JobExecutor]:
         chunking_service = provide_chunking_service(session)
         graph_service = provide_graph_service(settings)
 
+        job_service = JobService(session)
+
         workflow = DocumentProcessingWorkflow(
             storage_service=storage_service,
             content_service=content_service,
@@ -40,6 +42,7 @@ def provide_job_executor_factory() -> Callable[[AsyncSession], JobExecutor]:
             chunking_service=chunking_service,
             event_publisher=event_publisher,
             graph_service=graph_service,
+            job_service=job_service,
             settings=settings
         )
         
@@ -49,7 +52,11 @@ def provide_job_executor_factory() -> Callable[[AsyncSession], JobExecutor]:
         
         search_provider = PostgresSearchProvider(session)
         indexing_service = IndexingService(session, search_provider, content_repo)
-        indexing_workflow = IndexingWorkflow(indexing_service)
+        
+        from app.services.document_service import DocumentService
+        document_service = DocumentService(session, storage_service)
+        
+        indexing_workflow = IndexingWorkflow(indexing_service, document_service)
         
         return JobExecutor(
             processing_workflow=workflow,
@@ -119,7 +126,8 @@ def provide_entity_worker() -> EntityWorker:
         async def execute_job(self, job: Job) -> None:
             async with async_session_factory() as session:
                 entity_repo = EntityRepository(session)
-                content_repo = DocumentContentRepository(session)
+                from database.repositories.document_chunk_repository import DocumentChunkRepository
+                content_repo = DocumentChunkRepository(session)
                 boundary = EntityLLMExtractionBoundary(self.router, entity_repo, content_repo)
                 await boundary.execute_job(job)
                 await session.commit()
@@ -143,8 +151,11 @@ def provide_relationship_worker() -> RelationshipWorker:
         async def execute_job(self, job: Job) -> None:
             async with async_session_factory() as session:
                 entity_repo = EntityRepository(session)
-                content_repo = DocumentContentRepository(session)
-                boundary = RelationshipLLMExtractionBoundary(self.router, entity_repo, content_repo)
+                from database.repositories.relationship_repository import RelationshipRepository
+                relationship_repo = RelationshipRepository(session)
+                from database.repositories.document_chunk_repository import DocumentChunkRepository
+                content_repo = DocumentChunkRepository(session)
+                boundary = RelationshipLLMExtractionBoundary(self.router, relationship_repo, entity_repo, content_repo)
                 await boundary.execute_job(job)
                 await session.commit()
                 

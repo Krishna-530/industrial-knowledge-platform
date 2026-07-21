@@ -1,4 +1,6 @@
 from fastapi import Depends
+from sqlalchemy.ext.asyncio import AsyncSession
+from database.engine import get_db_session
 from app.workflows.document_upload_workflow import DocumentUploadWorkflow
 from app.workflows.document_processing_workflow import DocumentProcessingWorkflow
 
@@ -40,8 +42,12 @@ def provide_document_processing_workflow(
     chunking_service: ChunkingService = Depends(provide_chunking_service),
     event_publisher: EventPublisher = Depends(provide_event_publisher),
     graph_service: KnowledgeGraphService = Depends(provide_graph_service),
-    settings: Settings = Depends(provide_settings)
+    document_service: DocumentService = Depends(provide_document_service),
+    settings: Settings = Depends(provide_settings),
+    session: AsyncSession = Depends(get_db_session),
 ) -> DocumentProcessingWorkflow:
+    from app.services.job_service import JobService
+    job_service = JobService(session)
     return DocumentProcessingWorkflow(
         storage_service=storage_service,
         content_service=content_service,
@@ -49,5 +55,7 @@ def provide_document_processing_workflow(
         chunking_service=chunking_service,
         event_publisher=event_publisher,
         graph_service=graph_service,
-        settings=settings
+        job_service=job_service,
+        document_service=document_service,
+        settings=settings,
     )

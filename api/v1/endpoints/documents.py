@@ -119,26 +119,25 @@ from api.v1.schemas.explorer import ExplorerChunkResponse, ExplorerEntityRespons
 from app.services.document_explorer_service import DocumentExplorerService
 from database.repositories.graph_readonly_repository import ReadOnlyGraphRepository
 
-def get_document_explorer_service() -> DocumentExplorerService:
-    return DocumentExplorerService(ReadOnlyGraphRepository(driver=None)) # Stubbed driver
+from api.v1.dependencies.services import provide_document_explorer_service
 
 @router.get("/{document_id}/chunks", response_model=List[ExplorerChunkResponse], dependencies=[Depends(get_current_user)])
 async def get_document_chunks(
     document_id: UUID,
-    service: DocumentExplorerService = Depends(get_document_explorer_service)
+    service: DocumentExplorerService = Depends(provide_document_explorer_service)
 ):
     return await service.get_document_chunks(str(document_id))
 
 @router.get("/{document_id}/entities", response_model=List[ExplorerEntityResponse], dependencies=[Depends(get_current_user)])
 async def get_document_entities(
     document_id: UUID,
-    service: DocumentExplorerService = Depends(get_document_explorer_service)
+    service: DocumentExplorerService = Depends(provide_document_explorer_service)
 ):
     return await service.get_document_entities(str(document_id))
 
 @router.get("/{document_id}/relationships", response_model=List[ExplorerRelationshipResponse], dependencies=[Depends(get_current_user)])
 async def get_document_relationships(
     document_id: UUID,
-    service: DocumentExplorerService = Depends(get_document_explorer_service)
+    service: DocumentExplorerService = Depends(provide_document_explorer_service)
 ):
     return await service.get_document_relationships(str(document_id))

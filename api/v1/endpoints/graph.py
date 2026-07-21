@@ -11,15 +11,13 @@ from database.repositories.graph_readonly_repository import ReadOnlyGraphReposit
 # For this phase, we mock the driver injection for the route dependencies.
 router = APIRouter(prefix="/graph", tags=["Graph Explorer"])
 
-def get_graph_query_service() -> GraphQueryService:
-    # Stub: driver should be yielded from app state pool
-    return GraphQueryService(ReadOnlyGraphRepository(driver=None))
+from api.v1.dependencies.services import provide_graph_query_service
 
 @router.get("/node/{id}", response_model=GraphNodeResponse)
 async def get_node(
     id: str,
     user=Security(get_current_user),
-    service: GraphQueryService = Depends(get_graph_query_service)
+    service: GraphQueryService = Depends(provide_graph_query_service)
 ):
     node = await service.get_node(id)
     if not node:
@@ -31,7 +29,7 @@ async def get_neighborhood(
     id: str,
     depth: int = 1,
     user=Security(get_current_user),
-    service: GraphQueryService = Depends(get_graph_query_service)
+    service: GraphQueryService = Depends(provide_graph_query_service)
 ):
     return await service.get_neighborhood(id, depth)
 
@@ -39,14 +37,14 @@ async def get_neighborhood(
 async def search_graph(
     request: GraphSearchRequest,
     user=Security(get_current_user),
-    service: GraphQueryService = Depends(get_graph_query_service)
+    service: GraphQueryService = Depends(provide_graph_query_service)
 ):
     return await service.search_nodes(request.query, request.limit)
 
 @router.get("/statistics", response_model=GraphStatisticsResponse)
 async def get_statistics(
     user=Security(get_current_user),
-    service: GraphQueryService = Depends(get_graph_query_service)
+    service: GraphQueryService = Depends(provide_graph_query_service)
 ):
     return await service.get_statistics()
 
@@ -54,6 +52,6 @@ async def get_statistics(
 async def get_evidence(
     relationship_id: str,
     user=Security(get_current_user),
-    service: GraphQueryService = Depends(get_graph_query_service)
+    service: GraphQueryService = Depends(provide_graph_query_service)
 ):
     return await service.get_relationship_evidence(relationship_id)

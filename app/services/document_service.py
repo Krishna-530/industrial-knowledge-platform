@@ -72,18 +72,11 @@ class DocumentService:
             category_id=data.category_id,
             tags=tags
         )
-        
-        # Version Initialization Rule
-        await self.version_repo.create(
-            document_id=doc.id,
-            version_number=1,
-            uploaded_by=data.owner_id
-        )
 
         await self.session.commit()
-        
-        # Refresh the doc to get versions and tags populated if needed
-        await self.session.refresh(doc, ["tags", "versions"])
+
+        # Refresh the doc to get tags populated
+        await self.session.refresh(doc, ["tags"])
         return doc
 
     async def get_document(self, document_id: UUID):
@@ -140,6 +133,15 @@ class DocumentService:
         if not deleted:
             raise EntityNotFoundError(message="Document not found")
         await self.session.commit()
+        return True
+
+    async def activate_document(self, document_id: UUID) -> bool:
+        doc = await self.document_repo.get_by_id_for_update(document_id)
+        if not doc:
+            raise EntityNotFoundError(message="Document not found")
+        doc.status = DocumentStatus.ACTIVE
+        await self.session.commit()
+        logger.info({"event": "document_activated", "document_id": str(document_id)})
         return True
 
     async def validate_and_lock_for_upload(self, document_id: UUID, content_length: Optional[int] = None):

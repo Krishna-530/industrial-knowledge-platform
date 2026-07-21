@@ -31,9 +31,12 @@ from app.services.graph_query_service import GraphQueryService
 from database.neo4j_driver import Neo4jDriverManager
 from database.repositories.graph_repository import Neo4jGraphRepository
 from database.repositories.graph_readonly_repository import ReadOnlyGraphRepository
-from app.services.graph_service import KnowledgeGraphService
-from database.neo4j_driver import Neo4jDriverManager
-from database.repositories.graph_repository import Neo4jGraphRepository
+from app.services.document_explorer_service import DocumentExplorerService
+from app.services.dashboard_service import DashboardService
+from database.repositories.document_chunk_repository import DocumentChunkRepository
+from database.repositories.entity_repository import EntityRepository
+from database.repositories.relationship_repository import RelationshipRepository
+from database.repositories.job_repository import JobRepository
 
 def provide_graph_service(settings: Settings = Depends(provide_settings)) -> KnowledgeGraphService:
     driver_manager = Neo4jDriverManager.get_instance(settings)
@@ -156,3 +159,47 @@ def provide_admin_service(
     )
 
 
+def provide_dashboard_service(
+    session: AsyncSession = Depends(get_db_session),
+    settings: Settings = Depends(provide_settings),
+) -> DashboardService:
+    from app.services.knowledge_analytics_service import KnowledgeAnalyticsService
+    from database.repositories.extracted_fact_repository import ExtractedFactRepository
+    from database.repositories.intelligence_finding_repository import IntelligenceFindingRepository
+    from app.services.document_service import DocumentService as _DocumentService
+
+    fact_repo = ExtractedFactRepository(session)
+    finding_repo = IntelligenceFindingRepository(session)
+    analytics_service = KnowledgeAnalyticsService(session, fact_repo, finding_repo)
+    document_service = _DocumentService(session)
+    graph_query_service = provide_graph_query_service(settings)
+    document_repo = DocumentRepository(session)
+    chunk_repo = DocumentChunkRepository(session)
+    entity_repo = EntityRepository(session)
+    relationship_repo = RelationshipRepository(session)
+    job_repo = JobRepository(session)
+
+    return DashboardService(
+        analytics_service=analytics_service,
+        document_service=document_service,
+        graph_service=graph_query_service,
+        document_repo=document_repo,
+        chunk_repo=chunk_repo,
+        entity_repo=entity_repo,
+        relationship_repo=relationship_repo,
+        job_repo=job_repo,
+    )
+
+
+def provide_document_explorer_service(
+    settings: Settings = Depends(provide_settings),
+) -> DocumentExplorerService:
+    """Provides DocumentExplorerService backed by Neo4j read repo.
+    Returns a service with a None repo when knowledge graph is disabled;
+    the service methods guard against None and return empty lists.
+    """
+    if not settings.enable_knowledge_graph:
+        return DocumentExplorerService(readonly_repo=None)  # type: ignore[arg-type]
+    driver_manager = Neo4jDriverManager.get_instance(settings)
+    repo = ReadOnlyGraphRepository(driver_manager.driver) if driver_manager._driver else None
+    return DocumentExplorerService(readonly_repo=repo)  # type: ignore[arg-type]

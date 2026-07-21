@@ -22,7 +22,9 @@ class DocumentProcessingWorkflow:
         chunking_service: ChunkingService,
         event_publisher: EventPublisher,
         graph_service: KnowledgeGraphService,
-        settings: Settings
+        job_service: "JobService",
+        settings: Settings,
+        document_service=None,
     ):
         self.storage_service = storage_service
         self.content_service = content_service
@@ -30,7 +32,9 @@ class DocumentProcessingWorkflow:
         self.chunking_service = chunking_service
         self.event_publisher = event_publisher
         self.graph_service = graph_service
+        self.job_service = job_service
         self.settings = settings
+        self.document_service = document_service
 
     async def handle_document_uploaded(self, event: DocumentUploaded) -> None:
         start_time = time.perf_counter()
@@ -70,6 +74,17 @@ class DocumentProcessingWorkflow:
                     await self.graph_service.process_document_chunks(str(event.document_id), chunk_data)
                 except Exception as graph_e:
                     logger.warning(f"Knowledge Graph initialization failed, but continuing: {graph_e}")
+                    
+            # Enqueue extraction jobs for each chunk
+            for chunk in chunks:
+                await self.job_service.enqueue(
+                    job_type="EXTRACT_ENTITIES",
+                    payload={"chunk_id": str(chunk.id)}
+                )
+                await self.job_service.enqueue(
+                    job_type="EXTRACT_RELATIONSHIPS",
+                    payload={"chunk_id": str(chunk.id)}
+                )
             
             duration_ms = int((time.perf_counter() - start_time) * 1000)
             logger.info({
@@ -80,7 +95,18 @@ class DocumentProcessingWorkflow:
                 "duration_ms": duration_ms,
                 "status": "COMPLETED"
             })
-            
+
+            # Transition document to ACTIVE now that processing is complete
+            if self.document_service is not None:
+                try:
+                    await self.document_service.activate_document(event.document_id)
+                except Exception as activate_exc:
+                    logger.warning({
+                        "event": "document_activation_failed",
+                        "document_id": str(event.document_id),
+                        "error": str(activate_exc)
+                    })
+
             await self.event_publisher.publish(
                 DocumentProcessed(
                     document_id=event.document_id,

@@ -2,7 +2,7 @@ import logging
 from typing import List, Dict, Any, Optional
 from database.models.job import Job
 from database.repositories.entity_repository import EntityRepository
-from database.repositories.document_content_repository import DocumentContentRepository
+from database.repositories.document_chunk_repository import DocumentChunkRepository
 from database.repositories.relationship_repository import RelationshipRepository
 from app.extraction.router import ProviderRouter
 from app.extraction.schemas import ExtractedEntityCollection, ExtractedRelationshipCollection
@@ -13,7 +13,7 @@ class EntityLLMExtractionBoundary:
     """
     Coordinates entity extraction using the ProviderRouter and persists via EntityRepository.
     """
-    def __init__(self, router: ProviderRouter, entity_repo: EntityRepository, content_repo: DocumentContentRepository):
+    def __init__(self, router: ProviderRouter, entity_repo: EntityRepository, content_repo: DocumentChunkRepository):
         self.router = router
         self.entity_repo = entity_repo
         self.content_repo = content_repo
@@ -64,7 +64,7 @@ class RelationshipLLMExtractionBoundary:
     """
     Coordinates relationship extraction and maps to canonical predicates.
     """
-    def __init__(self, router: ProviderRouter, relationship_repo: "RelationshipRepository", entity_repo: EntityRepository, content_repo: DocumentContentRepository):
+    def __init__(self, router: ProviderRouter, relationship_repo: "RelationshipRepository", entity_repo: EntityRepository, content_repo: DocumentChunkRepository):
         self.router = router
         self.relationship_repo = relationship_repo
         self.entity_repo = entity_repo

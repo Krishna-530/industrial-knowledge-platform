@@ -7,7 +7,7 @@ from app.services.knowledge_analytics_service import KnowledgeAnalyticsService
 from database.models.intelligence_finding import FindingType
 # We assume there is a standard get_current_user dependency that provides the user info
 # For this implementation, we will mock it if it doesn't exist, but typically it returns a User object
-from dependencies.auth import get_current_user
+from dependencies.auth import get_current_user, RoleChecker
 from database.models.user import User
 
 router = APIRouter()
@@ -69,7 +69,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 async def provide_enterprise_analytics_service(session: AsyncSession = Depends(get_db_session)) -> EnterpriseAnalyticsService:
     return EnterpriseAnalyticsService(session)
 
-@router.get("/enterprise", response_model=EnterpriseAnalyticsResponse)
+@router.get("/enterprise", response_model=EnterpriseAnalyticsResponse,
+            dependencies=[Depends(RoleChecker(["Admin", "Manager"]))])
 async def get_enterprise_analytics(
     start_date: Optional[datetime] = Query(None),
     end_date: Optional[datetime] = Query(None),
@@ -80,6 +81,4 @@ async def get_enterprise_analytics(
     Get comprehensive enterprise analytics for the platform.
     Requires Manager or Admin role.
     """
-    # Note: Security middleware/dependencies would typically enforce the RBAC (Manager/Admin).
-    # Since this is a prototype/audit implementation for Phase 10, we simply return the payload.
     return await service.get_enterprise_analytics(start_date, end_date)

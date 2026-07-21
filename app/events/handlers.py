@@ -7,8 +7,6 @@ from workers.payloads import ProcessingJobPayload
 logger = logging.getLogger(__name__)
 
 async def handle_document_uploaded(event: DocumentUploaded) -> None:
-    with open("test_handler.txt", "a") as f:
-        f.write(f"Handler called for {event.document_id}\n")
     async with async_session_factory() as session:
         job_service = JobService(session)
         payload = ProcessingJobPayload(

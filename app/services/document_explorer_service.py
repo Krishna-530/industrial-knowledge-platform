@@ -16,6 +16,8 @@ class DocumentExplorerService:
         self.repo = readonly_repo
 
     async def get_document_chunks(self, document_id: str) -> List[ExplorerChunkResponse]:
+        if self.repo is None:
+            return []
         query = """
         MATCH (d:Document {id: $doc_id})-[:HAS_CHUNK]->(c:Chunk)
         RETURN c
@@ -35,6 +37,8 @@ class DocumentExplorerService:
         return chunks
 
     async def get_document_entities(self, document_id: str) -> List[ExplorerEntityResponse]:
+        if self.repo is None:
+            return []
         query = """
         MATCH (d:Document {id: $doc_id})-[:HAS_CHUNK]->(c:Chunk)-[:MENTIONS]->(e:Entity)
         RETURN DISTINCT e
@@ -52,6 +56,8 @@ class DocumentExplorerService:
         return entities
 
     async def get_document_relationships(self, document_id: str) -> List[ExplorerRelationshipResponse]:
+        if self.repo is None:
+            return []
         query = """
         MATCH (d:Document {id: $doc_id})-[:HAS_CHUNK]->(c:Chunk)-[:MENTIONS]->(sub:Entity)-[r]->(obj:Entity)
         RETURN sub, r, obj

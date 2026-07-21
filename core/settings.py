@@ -5,7 +5,12 @@ class Settings(BaseSettings):
     app_name: str = "Industrial Knowledge Intelligence Platform API"
     app_version: str = "1.0.0"
     debug: bool = False
-    
+
+    # Server / Uvicorn  (single source of truth for run.py)
+    server_host: str = "127.0.0.1"
+    server_port: int = 8000
+    server_workers: int = 1
+
     # Logging
     log_level: str = "INFO"
     log_format: str = "json"  # json or standard
