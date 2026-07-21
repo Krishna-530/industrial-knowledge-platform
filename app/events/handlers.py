@@ -7,6 +7,8 @@ from workers.payloads import ProcessingJobPayload
 logger = logging.getLogger(__name__)
 
 async def handle_document_uploaded(event: DocumentUploaded) -> None:
+    with open("test_handler.txt", "a") as f:
+        f.write(f"Handler called for {event.document_id}\n")
     async with async_session_factory() as session:
         job_service = JobService(session)
         payload = ProcessingJobPayload(
@@ -16,13 +18,10 @@ async def handle_document_uploaded(event: DocumentUploaded) -> None:
             storage_identifier=event.storage_identifier,
             mime_type=event.mime_type
         )
-        try:
-            await job_service.enqueue(
-                job_type="PROCESS_DOCUMENT",
-                payload=payload.model_dump(mode="json")
-            )
-        except Exception as e:
-            logger.error({"event": "event_handler_failed", "handler": "handle_document_uploaded", "error": str(e)})
+        await job_service.enqueue(
+            job_type="PROCESS_DOCUMENT",
+            payload=payload.model_dump(mode="json")
+        )
 
 from core.events.document_processed import DocumentProcessed
 from workers.payloads import IndexingJobPayload

@@ -21,13 +21,17 @@ class DocumentContentService:
 
     async def create_pending_content(self, document_version_id: UUID) -> None:
         try:
+            exists = await self.repo.exists(document_version_id)
+            if exists:
+                logger.info({"event": "document_content_already_exists", "version_id": str(document_version_id)})
+                return
             await self.repo.create(document_version_id=document_version_id)
             await self.session.commit()
             logger.info({"event": "document_content_created", "version_id": str(document_version_id), "status": ProcessingStatus.PENDING})
         except SQLAlchemyError as e:
             await self.session.rollback()
             logger.error({"event": "document_content_creation_failed", "version_id": str(document_version_id), "error": str(e)})
-            raise DocumentContentPersistenceException(message="Failed to create pending document content")
+            raise DocumentContentPersistenceException(message=f"Failed to create pending document content: {str(e)}")
 
     async def store_processing_result(self, document_version_id: UUID, result: ProcessingResult) -> None:
         try:
