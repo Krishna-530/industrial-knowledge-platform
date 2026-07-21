@@ -1,0 +1,35 @@
+# Set default behavior to automatically normalize line endings to LF on commit
+# and checkout as CRLF on Windows (depending on core.autocrlf) or LF on Unix.
+* text=auto
+
+# Source code and text files
+*.py text
+*.js text
+*.ts text
+*.tsx text
+*.json text
+*.md text
+*.toml text
+*.yml text
+*.yaml text
+*.css text
+*.html text
+*.sql text
+
+# Shell scripts must always use LF (Unix line endings)
+*.sh text eol=lf
+
+# Batch files must always use CRLF (Windows line endings)
+*.bat text eol=crlf
+
+# Binary files - Git shouldn't touch these
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.eot binary
+*.ttf binary
+*.woff binary
+*.woff2 binary
