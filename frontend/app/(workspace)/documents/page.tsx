@@ -2,20 +2,25 @@
 
 import React, { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Download, Trash2, RefreshCw, Search } from "lucide-react";
+import { Download, Trash2, RefreshCw, Search, Upload } from "lucide-react";
 import { useDocuments, useDeleteDocument, useRetryDocument } from "@/features/documents/hooks";
 import { DocumentStatusBadge } from "@/features/documents/components/DocumentStatusBadge";
 import { DocumentsSkeleton } from "@/features/documents/components/DocumentsSkeleton";
 import { EmptyDocuments } from "@/features/documents/components/EmptyDocuments";
+import { DemoUploadPanel } from "@/features/documents/components/DemoUploadPanel";
 import { DataTable, type Column } from "@/components/ui/DataTable";
 import { NetworkError } from "@/components/feedback/ErrorStates";
 import { useToast } from "@/hooks/useToast";
 import type { Document, DocumentStatus } from "@/features/documents/types";
+import { featureFlags } from "@/lib/feature-flags";
+
 
 function DocumentsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const toast = useToast();
+  const [showDemoUpload, setShowDemoUpload] = useState(false);
+
 
   const page = parseInt(searchParams.get("page") || "1", 10);
   const search = searchParams.get("search") || "";
@@ -130,7 +135,16 @@ function DocumentsContent() {
           onChange={(e) => setSearchInput(e.target.value)}
         />
       </div>
-      <div>
+      <div className="flex items-center gap-3">
+        {featureFlags.DEMO_MODE && (
+          <button
+            onClick={() => setShowDemoUpload(true)}
+            className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md shadow-sm transition-colors"
+          >
+            <Upload className="h-4 w-4 mr-2" />
+            Upload Document
+          </button>
+        )}
         <button
           onClick={() => refetch()}
           className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700"
@@ -141,6 +155,7 @@ function DocumentsContent() {
       </div>
     </div>
   );
+
 
   const renderActions = (doc: Document) => (
     <div className="flex justify-end space-x-2">
@@ -172,6 +187,13 @@ function DocumentsContent() {
         </p>
       </div>
 
+      {/* Demo Upload Overlay */}
+      {featureFlags.DEMO_MODE && showDemoUpload && (
+        <div className="max-w-lg">
+          <DemoUploadPanel onClose={() => setShowDemoUpload(false)} />
+        </div>
+      )}
+
       <DataTable
         columns={columns}
         rows={data?.items || []}
@@ -191,6 +213,7 @@ function DocumentsContent() {
     </div>
   );
 }
+
 
 export default function DocumentsPage() {
   return (

@@ -33,7 +33,7 @@ const MessageBubbleContent = ({ message, status, attachments, citations, toolCar
         {/* Avatar */}
         <div className={`flex-shrink-0 flex items-start ${isUser ? "ml-3" : "mr-3"}`}>
           <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-            isUser ? "bg-blue-600 text-white" : "bg-emerald-600 text-white"
+            isUser ? "bg-brand-500 text-white shadow-md" : "bg-[#161F2F] text-brand-400 border border-white/10 shadow-sm"
           }`}>
             {isUser ? <User className="w-5 h-5" /> : <Bot className="w-5 h-5" />}
           </div>
@@ -41,10 +41,10 @@ const MessageBubbleContent = ({ message, status, attachments, citations, toolCar
 
         {/* Message Body */}
         <div className={`flex flex-col ${isUser ? "items-end" : "items-start"}`}>
-          <div className={`px-4 py-3 rounded-2xl ${
+          <div className={`px-5 py-4 rounded-2xl ${
             isUser 
-              ? "bg-blue-600 text-white rounded-tr-sm" 
-              : "bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 shadow-sm rounded-tl-sm"
+              ? "bg-brand-500 text-white rounded-tr-sm shadow-md" 
+              : "bg-white dark:bg-[#161F2F] text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-white/10 shadow-sm rounded-tl-sm transition-all duration-200 hover:shadow-md hover:-translate-y-[1px]"
           }`}>
             <div className="text-sm">
               {isUser ? (

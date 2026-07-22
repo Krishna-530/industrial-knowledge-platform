@@ -2,18 +2,45 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { documentKeys } from "@/lib/query-keys";
 import { getDocuments, deleteDocument, retryDocument } from "./api";
 import type { DocumentListFilters } from "./types";
+import { featureFlags } from "@/lib/feature-flags";
+import { useDemoStore } from "@/lib/demo/useDemoStore";
+
 
 export function useDocuments(filters: DocumentListFilters) {
-  // We stringify the filters to create a stable query key for React Query
   const filterKey = JSON.stringify(filters);
-  
+  // Always call hook unconditionally (React hooks rules) — result used only in DEMO_MODE
+  const demoSnapshot = useDemoStore();
+
   return useQuery({
     queryKey: documentKeys.list(filterKey),
     queryFn: () => getDocuments(filters),
-    // Status can change as background workers process documents
-    staleTime: 30 * 1000, 
+    staleTime: 30 * 1000,
+    // In demo mode, seed the query with store data so the table is always populated
+    ...(featureFlags.DEMO_MODE ? {
+      initialData: (() => {
+        const { documents } = demoSnapshot;
+        const page = filters.page ?? 1;
+        const pageSize = filters.pageSize ?? 20;
+        const search = filters.search?.toLowerCase();
+        const filtered = search ? documents.filter(d => d.filename.toLowerCase().includes(search)) : documents;
+        const start = (page - 1) * pageSize;
+        return {
+          items: filtered.slice(start, start + pageSize).map(d => ({
+            id: d.id, filename: d.filename, status: d.status as any,
+            uploadedAt: d.uploadedAt, fileSize: d.fileSize, mimeType: d.mimeType,
+            assetCount: d.entityCount, errorMessage: null, processedAt: d.uploadedAt,
+          })),
+          total: filtered.length,
+          page,
+          pageSize,
+          totalPages: Math.ceil(filtered.length / pageSize),
+        };
+      })(),
+      initialDataUpdatedAt: Date.now(),
+    } : {}),
   });
 }
+
 
 export function useDeleteDocument() {
   const queryClient = useQueryClient();

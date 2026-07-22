@@ -26,7 +26,7 @@ export default function Topbar({ onMenuToggle }: TopbarProps) {
   };
 
   return (
-    <header className="h-16 flex-shrink-0 border-b border-border bg-surface flex items-center px-4 justify-between z-10">
+    <header className="h-16 flex-shrink-0 border-b border-border bg-white/80 dark:bg-[#0A0F1C]/80 backdrop-blur-md flex items-center px-4 justify-between z-10 sticky top-0">
       <div className="flex items-center gap-3">
         <button
           onClick={onMenuToggle}

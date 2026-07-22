@@ -24,6 +24,9 @@ import { WelcomeScreen } from "../components/WelcomeScreen";
 import { NetworkError } from "@/components/feedback/ErrorStates";
 import { useToast } from "@/hooks/useToast";
 import type { ConversationLifecycle } from "../types";
+import { featureFlags } from "@/lib/feature-flags";
+import { useDemoSendMessage } from "../hooks/useDemoSendMessage";
+
 
 export interface ChatWorkspaceProps {
   conversationId?: string; // Present if loaded from /chat/[id], undefined if on /chat
@@ -44,7 +47,11 @@ export function ChatWorkspace({ conversationId }: ChatWorkspaceProps) {
   // Mutations
   const createMutation = useCreateConversation();
   const deleteMutation = useDeleteConversation();
-  const sendMessageMutation = useSendMessage();
+  // Demo Mode: swap streaming logic for the demo simulator
+  const productionSendMessage = useSendMessage();
+  const demoSendMessage = useDemoSendMessage();
+  const sendMessageMutation = featureFlags.DEMO_MODE ? demoSendMessage : productionSendMessage;
+
 
   // SSE Connection removed since we stream directly on message send via the mutation.
   
@@ -100,9 +107,22 @@ export function ChatWorkspace({ conversationId }: ChatWorkspaceProps) {
   };
 
   const handleSendMessage = async (content: string) => {
-    if (!conversationId) return;
+    let targetConvId = conversationId;
+    if (!targetConvId) {
+      try {
+        const newConv = await createMutation.mutateAsync();
+        targetConvId = newConv.id;
+      } catch (error) {
+        toast.error("Failed to create conversation");
+        return;
+      }
+    }
+
     try {
-      await sendMessageMutation.mutateAsync({ conversationId, content });
+      await sendMessageMutation.mutateAsync({ conversationId: targetConvId, content });
+      if (!conversationId) {
+        router.push(`/chat/${targetConvId}`);
+      }
       scrollToBottom("smooth"); // Force scroll on optimistic update
     } catch (error) {
       toast.error("Failed to send message");
@@ -128,15 +148,13 @@ export function ChatWorkspace({ conversationId }: ChatWorkspaceProps) {
 
   // Render Main Panel
   const renderPanel = () => {
-    if (!conversationId) {
-      return <WelcomeScreen onStartConversation={handleCreateConversation} />;
-    }
+    const isInitialEmptyState = !conversationId;
 
-    if (conversationDetailsQuery.isLoading || messagesQuery.isLoading) {
+    if (!isInitialEmptyState && (conversationDetailsQuery.isLoading || messagesQuery.isLoading)) {
       return <MessageListSkeleton />;
     }
 
-    if (conversationDetailsQuery.isError || messagesQuery.isError) {
+    if (!isInitialEmptyState && (conversationDetailsQuery.isError || messagesQuery.isError)) {
       return <NetworkError onRetry={() => {
         conversationDetailsQuery.refetch();
         messagesQuery.refetch();
@@ -144,28 +162,40 @@ export function ChatWorkspace({ conversationId }: ChatWorkspaceProps) {
     }
 
     return (
-      <div className="flex-1 flex flex-col min-w-0 bg-white dark:bg-gray-950">
+      <div className="flex-1 flex flex-col min-w-0 min-h-0 bg-white dark:bg-[#0A0F1C]">
         <ConversationHeader 
-          title={activeConversation?.title || "Conversation"} 
-          onRename={() => handleRenameConversation(conversationId)}
-          onDelete={() => handleDeleteConversation(conversationId)}
+          title={activeConversation?.title || "New Conversation"} 
+          onRename={() => conversationId && handleRenameConversation(conversationId)}
+          onDelete={() => conversationId && handleDeleteConversation(conversationId)}
           statusIndicator={
             isStreaming ? "Assistant is thinking..." : 
             isFailed ? "Conversation failed" : null
           }
         />
         
-        <StreamErrorBoundary>
-          <MessageList 
-            messages={messages} 
-            scrollContainerRef={containerRef} 
-          />
-        </StreamErrorBoundary>
+        {messages.length === 0 && !isStreaming ? (
+          <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-muted">
+            <div className="w-16 h-16 bg-brand-500/10 text-brand-500 rounded-2xl flex items-center justify-center mb-6">
+              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-semibold text-foreground mb-2">How can I help you today?</h2>
+            <p className="max-w-md mx-auto text-sm">Ask a question about your documents, pipelines, or industrial processes to get started.</p>
+          </div>
+        ) : (
+          <StreamErrorBoundary>
+            <MessageList 
+              messages={messages} 
+              scrollContainerRef={containerRef} 
+            />
+          </StreamErrorBoundary>
+        )}
 
         {/* Future Stream Placeholder */}
         {/* <StreamPlaceholder /> */}
 
-        <div className="p-4 sm:p-6 bg-white dark:bg-gray-950">
+        <div className="p-4 sm:p-6 bg-white dark:bg-[#0A0F1C]">
           <div className="max-w-4xl mx-auto">
             <MessageInput 
               onSend={handleSendMessage}

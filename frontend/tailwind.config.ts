@@ -52,10 +52,10 @@ const config: Config = {
 
       // Frozen box-shadow
       boxShadow: {
-        sm:   "0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)",
-        md:   "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
-        lg:   "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
-        glow: "0 0 0 3px var(--brand-500)",
+        sm:   "0 2px 4px rgba(0,0,0,0.05)",
+        md:   "0 4px 12px rgba(0,0,0,0.08)",
+        lg:   "0 8px 24px rgba(0,0,0,0.15)",
+        glow: "0 0 0 2px var(--brand-500), 0 0 12px rgba(59, 130, 246, 0.3)",
       },
 
       // Frozen z-index scale — never use z-[arbitrary] outside this registry

@@ -18,30 +18,30 @@ html {
 
 /* =============================================================
    CSS Design Tokens — Light Mode (:root)
-   Industrial palette: slate neutrals + amber brand accent
+   Premium palette: refined neutrals + blue brand accent
    ============================================================= */
 :root {
   /* Backgrounds */
-  --background: #f8fafc;        /* slate-50 */
-  --surface:    #ffffff;        /* white */
-  --foreground: #0f172a;        /* slate-900 */
-  --muted:      #64748b;        /* slate-500 */
-  --border:     #e2e8f0;        /* slate-200 */
+  --background: #F9FAFB;        /* gray-50 */
+  --surface:    #FFFFFF;        /* white */
+  --foreground: #111827;        /* gray-900 */
+  --muted:      #6B7280;        /* gray-500 */
+  --border:     #E5E7EB;        /* gray-200 */
 
-  /* Brand — amber/gold industrial accent */
-  --brand-50:  #fffbeb;
-  --brand-100: #fef3c7;
-  --brand-200: #fde68a;
-  --brand-500: #f59e0b;
-  --brand-600: #d97706;
-  --brand-700: #b45309;
-  --brand-900: #78350f;
+  /* Brand — Blue accent */
+  --brand-50:  #EFF6FF;
+  --brand-100: #DBEAFE;
+  --brand-200: #BFDBFE;
+  --brand-500: #3B82F6;         /* Primary */
+  --brand-600: #2563EB;         /* Active */
+  --brand-700: #1D4ED8;
+  --brand-900: #1E3A8A;
 
   /* Semantic */
-  --success: #16a34a;   /* green-600 */
-  --warning: #d97706;   /* amber-600 */
-  --danger:  #dc2626;   /* red-600 */
-  --info:    #2563eb;   /* blue-600 */
+  --success: #10B981;   /* emerald-500 */
+  --warning: #F59E0B;   /* amber-500 */
+  --danger:  #EF4444;   /* red-500 */
+  --info:    #3B82F6;   /* blue-500 */
 }
 
 /* =============================================================
@@ -49,26 +49,26 @@ html {
    ============================================================= */
 .dark {
   /* Backgrounds */
-  --background: #0f172a;        /* slate-900 */
-  --surface:    #1e293b;        /* slate-800 */
-  --foreground: #f1f5f9;        /* slate-100 */
-  --muted:      #94a3b8;        /* slate-400 */
-  --border:     #334155;        /* slate-700 */
+  --background: #0A0F1C;        
+  --surface:    #161F2F;        
+  --foreground: #F3F4F6;        /* gray-100 */
+  --muted:      #9CA3AF;        /* gray-400 */
+  --border:     rgba(255, 255, 255, 0.08);
 
-  /* Brand — amber tones on dark */
-  --brand-50:  #1c1100;
-  --brand-100: #382200;
-  --brand-200: #6b4100;
-  --brand-500: #fbbf24;         /* amber-400 — brighter on dark */
-  --brand-600: #f59e0b;
-  --brand-700: #d97706;
-  --brand-900: #fef3c7;
+  /* Brand — Blue accent */
+  --brand-50:  #172554;
+  --brand-100: #1E3A8A;
+  --brand-200: #1D4ED8;
+  --brand-500: #3B82F6;         /* Primary */
+  --brand-600: #60A5FA;         /* Hover/Lighter */
+  --brand-700: #93C5FD;
+  --brand-900: #DBEAFE;
 
   /* Semantic */
-  --success: #4ade80;   /* green-400 */
-  --warning: #fbbf24;   /* amber-400 */
-  --danger:  #f87171;   /* red-400 */
-  --info:    #60a5fa;   /* blue-400 */
+  --success: #10B981;   /* emerald-500 */
+  --warning: #F59E0B;   /* amber-500 */
+  --danger:  #EF4444;   /* red-500 */
+  --info:    #3B82F6;   /* blue-500 */
 }
 
 /* =============================================================

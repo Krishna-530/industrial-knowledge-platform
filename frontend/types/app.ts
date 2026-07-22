@@ -62,4 +62,5 @@ export interface FeatureFlags {
   ENABLE_MULTI_AGENT: boolean;
   ENABLE_KNOWLEDGE_GRAPH: boolean;
   ENABLE_EXPERIMENTAL_CHAT: boolean;
+  DEMO_MODE: boolean;
 }

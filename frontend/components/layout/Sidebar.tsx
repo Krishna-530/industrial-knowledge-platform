@@ -34,11 +34,11 @@ function SidebarItem({ item, isActive, isCollapsed, user, onClick }: { item: Nav
         href={item.href}
         onClick={onClick}
         className={cn(
-          "flex items-center rounded-md transition-colors text-sm font-medium",
+          "flex items-center rounded-lg transition-all duration-150 text-sm font-medium",
           isCollapsed ? "justify-center p-3" : "gap-3 px-3 py-2",
           isActive 
-            ? "bg-brand-50 text-brand-700 dark:bg-brand-900/30 dark:text-brand-300" 
-            : "text-muted hover:text-foreground hover:bg-background"
+            ? "bg-brand-50 text-brand-600 dark:bg-[#1E3A8A]/30 dark:text-brand-500" 
+            : "text-muted hover:text-foreground hover:bg-gray-100 dark:hover:bg-white/5"
         )}
         title={isCollapsed ? item.title : undefined}
       >
@@ -87,7 +87,7 @@ export default function Sidebar({ isMobileOpen, onClose }: SidebarProps) {
       {/* Sidebar Container */}
       <aside 
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex flex-col bg-surface border-r border-border transition-all duration-300 ease-in-out md:static md:translate-x-0 h-full",
+          "fixed inset-y-0 left-0 z-50 flex flex-col bg-surface border-r border-border transition-all duration-300 ease-in-out md:static md:translate-x-0 h-full dark:bg-[#111827]",
           isCollapsed ? "w-20" : "w-64",
           isMobileOpen ? "translate-x-0" : "-translate-x-full"
         )}

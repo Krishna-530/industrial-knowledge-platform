@@ -138,27 +138,6 @@ def provide_infrastructure_health_service(
     
     return InfrastructureHealthService(session, llm_provider, embedding_provider, settings)
 
-def provide_admin_service(
-    session: AsyncSession = Depends(get_db_session),
-    dashboard_service: DashboardService = Depends(provide_dashboard_service),
-    document_service: DocumentService = Depends(provide_document_service),
-    infra_health = Depends(provide_infrastructure_health_service)
-):
-    from app.services.admin_service import AdminService
-    from app.services.user_service import UserService
-    from app.services.job_service import JobService
-    from database.repositories.version import VersionRepository
-    
-    return AdminService(
-        dashboard_service=dashboard_service,
-        user_service=UserService(session),
-        document_service=document_service,
-        job_service=JobService(session),
-        version_repo=VersionRepository(session),
-        infra_health=infra_health
-    )
-
-
 def provide_dashboard_service(
     session: AsyncSession = Depends(get_db_session),
     settings: Settings = Depends(provide_settings),
@@ -188,6 +167,27 @@ def provide_dashboard_service(
         entity_repo=entity_repo,
         relationship_repo=relationship_repo,
         job_repo=job_repo,
+    )
+
+
+def provide_admin_service(
+    session: AsyncSession = Depends(get_db_session),
+    dashboard_service: DashboardService = Depends(provide_dashboard_service),
+    document_service: DocumentService = Depends(provide_document_service),
+    infra_health = Depends(provide_infrastructure_health_service)
+):
+    from app.services.admin_service import AdminService
+    from app.services.user_service import UserService
+    from app.services.job_service import JobService
+    from database.repositories.version import VersionRepository
+    
+    return AdminService(
+        dashboard_service=dashboard_service,
+        user_service=UserService(session),
+        document_service=document_service,
+        job_service=JobService(session),
+        version_repo=VersionRepository(session),
+        infra_health=infra_health
     )
 
 
